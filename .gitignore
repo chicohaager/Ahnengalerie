@@ -20,3 +20,14 @@
 /_site/
 /dist/
 /out-tsc/
+
+# Ahnengalerie: family documents/photos never belong in this public repo.
+# Source material lives outside the tree (see DEPLOY.md); scans/photos are
+# uploaded as media through the app itself.
+*.jpeg
+*.jpg
+*.JPG
+*.JPEG
+*.gramps
+*.gpkg
+*.ged
