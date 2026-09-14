@@ -1,0 +1,249 @@
+# Ahnengalerie — Gramps Web with the family theme — as a ZimaOS app.
+#
+# Image: built ON THE HOST from this repo's dist/ (`deploy/zimaos/build-on-host.sh`),
+#        tagged `ahnengalerie:local`. The compose references that local tag; ZimaOS
+#        starts local images without a registry pull (ZIMAOS-KNOWLEDGE §27.6).
+# Install: python3 ~/dev/zimapp/zimapp.py install deploy/zimaos/ahnengalerie.yml --host <ip> --user <zimaos-user>
+# Base image: dmstraub/gramps-webapi:latest (Gramps Web API + Gramps), AGPL-3.0.
+# Stack shape follows upstream's docker-compose-base (gramps-web-docs/examples).
+#
+# Three services: `web` (gunicorn, the UI + API), `celery` (background tasks:
+# imports, exports, search index, reports) and `redis` (Valkey — broker, result
+# backend, rate-limit store). All persistent state is bind-mounted under
+# /DATA/AppData/ahnengalerie/.
+#
+# 🔴 celery waits for web to be HEALTHY, not merely started. Measured 2026-09-14:
+# both containers create the tree named in GRAMPSWEB_TREE at boot, and started
+# together they created TWO trees of the same name (two dirs under grampsdb).
+# Gated on the healthcheck, exactly one is created.
+#
+# Registration is disabled on both sides: GRAMPSWEB_REGISTRATION_DISABLED makes
+# POST /api/users/<name>/register/ answer 405 (measured), and the frontend hides
+# the button (src/config.js). Family members get accounts from the admin.
+#
+# First start: open http://<ip>:8300/ — the app offers the owner-account wizard
+# (POST /api/token/create_owner/ answers only while no owner exists).
+#
+name: ahnengalerie
+services:
+  web:
+    image: ahnengalerie:local
+    container_name: ahnengalerie
+    restart: unless-stopped
+    ports:
+      - mode: ingress
+        target: 5000
+        published: "8300"
+        protocol: tcp
+    environment:
+      - TZ=Europe/Berlin
+      - GRAMPSWEB_TREE=Ahnengalerie
+      - GRAMPSWEB_REGISTRATION_DISABLED=true
+      - GRAMPSWEB_DISABLE_TELEMETRY=true
+      - GRAMPSWEB_CELERY_CONFIG__broker_url=redis://ahnengalerie-redis:6379/0
+      - GRAMPSWEB_CELERY_CONFIG__result_backend=redis://ahnengalerie-redis:6379/0
+      - GRAMPSWEB_RATELIMIT_STORAGE_URI=redis://ahnengalerie-redis:6379/1
+      - GUNICORN_NUM_WORKERS=4
+    volumes:
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/users
+        target: /app/users
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/index
+        target: /app/indexdir
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/thumbnail_cache
+        target: /app/thumbnail_cache
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/cache
+        target: /app/cache
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/secret
+        target: /app/secret
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/db
+        target: /root/.gramps/grampsdb
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/media
+        target: /app/media
+      # web writes uploads to /tmp, celery reads them there: must be shared.
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/tmp
+        target: /tmp
+    # No curl/wget needed: python3 is in the image. GET / is the static index
+    # (200 without auth); it answers once a gunicorn worker has booted the app,
+    # and booting the app is what creates the tree.
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/', timeout=5)"
+      interval: 10s
+      timeout: 6s
+      retries: 30
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_started
+    networks:
+      - ahnengalerie-network
+    labels:
+      icon: https://raw.githubusercontent.com/chicohaager/Ahnengalerie/main/images/icon512.png
+    x-casaos:
+      envs:
+        - container: GRAMPSWEB_TREE
+          description:
+            en_us: Name of the family tree (created on first start if missing)
+            de_de: Name des Stammbaums (wird beim ersten Start angelegt)
+        - container: GRAMPSWEB_REGISTRATION_DISABLED
+          description:
+            en_us: Keep "true" — accounts are created by the admin, never self-registered
+            de_de: Auf "true" lassen — Konten legt der Admin an, keine Selbstregistrierung
+        - container: GUNICORN_NUM_WORKERS
+          description:
+            en_us: Web worker processes (more = more parallel requests, more RAM)
+            de_de: Web-Worker-Prozesse (mehr = mehr parallele Anfragen, mehr RAM)
+        - container: TZ
+          description:
+            en_us: Timezone
+            de_de: Zeitzone
+      ports:
+        - container: "5000"
+          description:
+            en_us: Web UI and API
+            de_de: Weboberfläche und API
+      volumes:
+        - container: /root/.gramps/grampsdb
+          description:
+            en_us: The family tree database
+            de_de: Die Stammbaum-Datenbank
+        - container: /app/media
+          description:
+            en_us: Uploaded photos and document scans
+            de_de: Hochgeladene Fotos und Dokument-Scans
+        - container: /app/users
+          description:
+            en_us: User accounts
+            de_de: Benutzerkonten
+        - container: /app/secret
+          description:
+            en_us: Flask secret key (generated on first start; losing it logs everyone out)
+            de_de: Flask-Secret (beim ersten Start erzeugt; Verlust meldet alle ab)
+        - container: /app/indexdir
+          description:
+            en_us: Search index (rebuildable)
+            de_de: Suchindex (neu aufbaubar)
+        - container: /app/thumbnail_cache
+          description:
+            en_us: Thumbnail cache (safe to delete)
+            de_de: Vorschaubild-Cache (löschbar)
+        - container: /app/cache
+          description:
+            en_us: Report, export and request caches (safe to delete)
+            de_de: Bericht-, Export- und Request-Caches (löschbar)
+        - container: /tmp
+          description:
+            en_us: Upload staging shared with the worker
+            de_de: Upload-Zwischenablage, geteilt mit dem Worker
+
+  celery:
+    image: ahnengalerie:local
+    container_name: ahnengalerie-celery
+    restart: unless-stopped
+    command: celery -A gramps_webapi.celery worker --loglevel=INFO --concurrency=2
+    environment:
+      - TZ=Europe/Berlin
+      - GRAMPSWEB_TREE=Ahnengalerie
+      - GRAMPSWEB_REGISTRATION_DISABLED=true
+      - GRAMPSWEB_DISABLE_TELEMETRY=true
+      - GRAMPSWEB_CELERY_CONFIG__broker_url=redis://ahnengalerie-redis:6379/0
+      - GRAMPSWEB_CELERY_CONFIG__result_backend=redis://ahnengalerie-redis:6379/0
+      - GRAMPSWEB_RATELIMIT_STORAGE_URI=redis://ahnengalerie-redis:6379/1
+    volumes:
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/users
+        target: /app/users
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/index
+        target: /app/indexdir
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/thumbnail_cache
+        target: /app/thumbnail_cache
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/cache
+        target: /app/cache
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/secret
+        target: /app/secret
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/db
+        target: /root/.gramps/grampsdb
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/media
+        target: /app/media
+      - type: bind
+        source: /DATA/AppData/ahnengalerie/tmp
+        target: /tmp
+    depends_on:
+      redis:
+        condition: service_started
+      web:
+        condition: service_healthy
+    networks:
+      - ahnengalerie-network
+
+  redis:
+    image: docker.io/valkey/valkey:8-alpine
+    container_name: ahnengalerie-redis
+    restart: unless-stopped
+    networks:
+      - ahnengalerie-network
+
+networks:
+  ahnengalerie-network:
+    driver: bridge
+
+x-casaos:
+  architectures:
+    - amd64
+  main: web
+  id: io.github.chicohaager.ahnengalerie
+  scheme: http
+  version: "1.0.0"
+  author: Lintuxer
+  developer: Gramps Project / Ahnengalerie fork
+  category: Home
+  icon: https://raw.githubusercontent.com/chicohaager/Ahnengalerie/main/images/icon512.png
+  title:
+    en_us: Ahnengalerie
+    de_de: Ahnengalerie
+    custom: Ahnengalerie
+  tagline:
+    en_us: The family tree — Gramps Web, themed and locked to family accounts
+    de_de: Der Familienstammbaum — Gramps Web im Familien-Look, nur für Familienkonten
+  description:
+    en_us: >-
+      Gramps Web (open-source genealogy) as the family's shared tree: people,
+      families, events, places, sources, media and charts, edited together in
+      the browser. This build carries the Ahnengalerie theme and has
+      self-registration switched off — accounts are created by the admin.
+    de_de: >-
+      Gramps Web (Open-Source-Genealogie) als gemeinsamer Stammbaum der Familie:
+      Personen, Familien, Ereignisse, Orte, Quellen, Medien und Diagramme,
+      gemeinsam im Browser gepflegt. Dieser Build trägt das Ahnengalerie-Theme;
+      Selbstregistrierung ist aus — Konten legt der Admin an.
+  tips:
+    before_install:
+      en_us: >-
+        **First start:** open the app, it shows the wizard for the owner
+        account. Afterwards add family members under Settings → Manage users.
+        The image `ahnengalerie:local` must exist on this host before installing
+        (deploy/zimaos/build-on-host.sh).
+      de_de: >-
+        **Erster Start:** App öffnen, sie zeigt den Assistenten für das
+        Admin-Konto. Danach Familienmitglieder unter Einstellungen → Benutzer
+        verwalten anlegen. Das Image `ahnengalerie:local` muss vor der
+        Installation auf dem Host gebaut sein (deploy/zimaos/build-on-host.sh).
+  index: /
+  port_map: "8300"
