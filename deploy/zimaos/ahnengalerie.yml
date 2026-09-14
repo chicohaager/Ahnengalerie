@@ -1,8 +1,10 @@
 # Ahnengalerie — Gramps Web with the family theme — as a ZimaOS app.
 #
-# Image: built ON THE HOST from this repo's dist/ (`deploy/zimaos/build-on-host.sh`),
-#        tagged `ahnengalerie:local`. The compose references that local tag; ZimaOS
-#        starts local images without a registry pull (ZIMAOS-KNOWLEDGE §27.6).
+# Image: built ON THE HOST from this repo's dist/ (`deploy/zimaos/build-on-host.sh`)
+#        and pushed into a registry that listens on the host's 127.0.0.1:5000 only.
+#        ZimaOS v1.7.1-beta1 pulls every image through its mirror orchestrator, so a
+#        tag that lives only in the local daemon cannot be installed (measured
+#        2026-09-14: "Repository existiert nicht"); a localhost registry can.
 # Install: python3 ~/dev/zimapp/zimapp.py install deploy/zimaos/ahnengalerie.yml --host <ip> --user <zimaos-user>
 # Base image: dmstraub/gramps-webapi:latest (Gramps Web API + Gramps), AGPL-3.0.
 # Stack shape follows upstream's docker-compose-base (gramps-web-docs/examples).
@@ -27,7 +29,7 @@
 name: ahnengalerie
 services:
   web:
-    image: ahnengalerie:local
+    image: 127.0.0.1:5000/ahnengalerie:local
     container_name: ahnengalerie
     restart: unless-stopped
     ports:
@@ -148,7 +150,7 @@ services:
             de_de: Upload-Zwischenablage, geteilt mit dem Worker
 
   celery:
-    image: ahnengalerie:local
+    image: 127.0.0.1:5000/ahnengalerie:local
     container_name: ahnengalerie-celery
     restart: unless-stopped
     command: celery -A gramps_webapi.celery worker --loglevel=INFO --concurrency=2
@@ -238,12 +240,12 @@ x-casaos:
       en_us: >-
         **First start:** open the app, it shows the wizard for the owner
         account. Afterwards add family members under Settings → Manage users.
-        The image `ahnengalerie:local` must exist on this host before installing
+        The image must be in the host-local registry before installing
         (deploy/zimaos/build-on-host.sh).
       de_de: >-
         **Erster Start:** App öffnen, sie zeigt den Assistenten für das
         Admin-Konto. Danach Familienmitglieder unter Einstellungen → Benutzer
-        verwalten anlegen. Das Image `ahnengalerie:local` muss vor der
-        Installation auf dem Host gebaut sein (deploy/zimaos/build-on-host.sh).
+        verwalten anlegen. Das Image muss vor der Installation in der
+        Host-lokalen Registry liegen (deploy/zimaos/build-on-host.sh).
   index: /
   port_map: "8300"
