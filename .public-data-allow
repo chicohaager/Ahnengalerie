@@ -1,0 +1,7 @@
+# Exemptions for check-public-data.py — decided once, recorded here.
+# Every address entry is path-scoped (<path>:<address>); bare addresses are refused.
+#
+# Upstream test fixture (gramps-project/gramps-web, commit 0c96fde1, author
+# Karl von Randow): a generic router address used to prove that an IPv4 is not
+# mistaken for a phone number. Not a host of ours.
+test/unit/urlUtil.test.js:192.168.1.1
