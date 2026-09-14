@@ -241,7 +241,14 @@ class GrampsjsLogin extends GrampsjsAppStateMixin(LitElement) {
           @submit="${this._submitLogin}"
           @keydown="${this._handleFormKeydown}"
         >
-          <h2>${this._('Log in to Gramps Web')}</h2>
+          <h2>
+            ${window.grampsjsConfig.appName
+              ? this._('Log in to Gramps Web').replace(
+                  'Gramps Web',
+                  window.grampsjsConfig.appName
+                )
+              : this._('Log in to Gramps Web')}
+          </h2>
           ${localAuthDisabled
             ? ''
             : html`

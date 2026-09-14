@@ -1,11 +1,11 @@
 {
-  "name": "Gramps",
-  "short_name": "Gramps",
-  "lang": "en",
+  "name": "Ahnengalerie",
+  "short_name": "Ahnengalerie",
+  "lang": "de",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#6D4C41",
-  "background_color" : "#fff",
+  "theme_color": "#234B3E",
+  "background_color": "#F5F4EE",
   "icons": [
     {
       "src": "images/icon192.png",
