@@ -73,6 +73,28 @@ class GrampsjsPages extends GrampsjsAppStateMixin(LitElement) {
         .page[active] {
           display: block;
         }
+
+        /* Ahnengalerie: every top-level view is a white sheet on the warm
+           page background (ZFW card). The views keep their own inner spacing
+           via :host margin; the sheet adds the frame around it. Full-bleed
+           views (map, charts, chat) stay flat. */
+        .page[active]:not(.bleed) {
+          /* flow-root: the dashboard lays its columns out with floats, and a
+             sheet that does not contain them collapses to its padding. */
+          display: flow-root;
+          margin: 20px 28px 32px;
+          padding: 4px 0;
+          background: var(--md-sys-color-surface);
+          border: var(--grampsjs-card-border);
+          border-radius: var(--grampsjs-card-radius);
+          box-shadow: var(--grampsjs-card-shadow);
+        }
+
+        @media (max-width: 768px) {
+          .page[active]:not(.bleed) {
+            margin: 12px 10px 24px;
+          }
+        }
       `,
     ]
   }
@@ -192,12 +214,12 @@ class GrampsjsPages extends GrampsjsAppStateMixin(LitElement) {
         .appState="${this.appState}"
       ></grampsjs-view-help>
       <grampsjs-view-map
-        class="page"
+        class="page bleed"
         ?active=${this.appState.path.page === 'map'}
         .appState="${this.appState}"
       ></grampsjs-view-map>
       <grampsjs-view-tree
-        class="page"
+        class="page bleed"
         ?active=${this.appState.path.page === 'tree'}
         grampsId="${this.settings.homePerson}"
         .appState="${this.appState}"
@@ -262,7 +284,7 @@ class GrampsjsPages extends GrampsjsAppStateMixin(LitElement) {
       ${this.canUseChat
         ? html`
             <grampsjs-view-chat
-              class="page"
+              class="page bleed"
               ?active=${this.appState.path.page === 'chat'}
               .appState="${this.appState}"
             ></grampsjs-view-chat>

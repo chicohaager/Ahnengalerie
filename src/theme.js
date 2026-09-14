@@ -8,8 +8,20 @@ import {
   hexFromArgb,
 } from '@material/material-color-utilities'
 
-export const DEFAULT_PRIMARY = '#6d4c41'
-export const DEFAULT_SECONDARY = '#0277bd'
+// Ahnengalerie: forest-green accent from the ZFW design system. The secondary
+// seed (action buttons, links) is the same hue so the app carries one accent.
+export const DEFAULT_PRIMARY = '#234b3e'
+export const DEFAULT_SECONDARY = '#234b3e'
+
+// Ahnengalerie light-mode surfaces (ZFW tokens): warm off-white page, white
+// sheets, warm hairline borders. Kept here so applyColors() stays the single
+// place that writes --md-sys-color-* tokens.
+export const LIGHT_PAGE_BG = '#f5f4ee'
+export const LIGHT_SHEET_BG = '#ffffff'
+export const LIGHT_SHEET_BORDER = '#ece9df'
+export const LIGHT_FIELD_BG = '#f8f6f0'
+export const LIGHT_TEXT = '#0f1f1a'
+export const LIGHT_TEXT_MUTED = '#6b7280'
 
 export function getSystemTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -77,19 +89,38 @@ export function applyColors(
   // M3 achromatic tones 90-98 are darker than expected for a web app.
   // Override light-mode surfaces to lighter neutrals.
   if (!isDark) {
-    root.style.setProperty('--md-sys-color-background', '#ffffff')
-    root.style.setProperty('--md-sys-color-surface', '#ffffff')
+    // Ahnengalerie: page is warm off-white, everything that sits on it
+    // (views, drawer, menus, dialogs) is a white sheet — the ZFW card look.
+    root.style.setProperty('--md-sys-color-background', LIGHT_PAGE_BG)
+    root.style.setProperty('--md-sys-color-on-background', LIGHT_TEXT)
+    root.style.setProperty('--md-sys-color-surface', LIGHT_SHEET_BG)
+    root.style.setProperty('--md-sys-color-on-surface', LIGHT_TEXT)
+    root.style.setProperty(
+      '--md-sys-color-on-surface-variant',
+      LIGHT_TEXT_MUTED
+    )
     // lowest/low/container → menus, cards, sheets: white
-    root.style.setProperty('--md-sys-color-surface-container-lowest', '#ffffff')
-    root.style.setProperty('--md-sys-color-surface-container-low', '#ffffff')
-    root.style.setProperty('--md-sys-color-surface-container', '#ffffff')
+    root.style.setProperty(
+      '--md-sys-color-surface-container-lowest',
+      LIGHT_SHEET_BG
+    )
+    root.style.setProperty(
+      '--md-sys-color-surface-container-low',
+      LIGHT_SHEET_BG
+    )
+    root.style.setProperty('--md-sys-color-surface-container', LIGHT_SHEET_BG)
     // high → dialogs, raised surfaces: white (md-dialog uses this token)
-    root.style.setProperty('--md-sys-color-surface-container-high', '#ffffff')
-    // highest → filled text-field/select backgrounds: light gray
+    root.style.setProperty(
+      '--md-sys-color-surface-container-high',
+      LIGHT_SHEET_BG
+    )
+    // highest → filled text-field/select backgrounds: warm light field
     root.style.setProperty(
       '--md-sys-color-surface-container-highest',
-      'rgb(235, 235, 235)'
+      LIGHT_FIELD_BG
     )
+    // hairline borders (dividers, outlined fields) in the warm sheet border
+    root.style.setProperty('--md-sys-color-outline-variant', LIGHT_SHEET_BORDER)
   }
 
   // Action color for edit/add/delete buttons: clamp tone to a readable range

@@ -114,7 +114,7 @@ export const LegendCategorical = (
     .attr('x', legendItemWidth + 8)
     .attr('fill', 'var(--grampsjs-body-font-color)')
     .attr('text-anchor', 'start')
-    .attr('font-family', 'Inter var')
+    .attr('font-family', 'Fira Sans')
     .attr('font-weight', 350)
     .attr('font-size', 13)
     .attr(
