@@ -1,3 +1,23 @@
+# Ahnengalerie
+
+> **This is a family fork of [Gramps Web](https://github.com/gramps-project/gramps-web)** — the
+> same app, re-themed (warm off-white pages, forest-green accent, Fira Sans, sheet-style
+> views) and locked to admin-created accounts. Nothing about the data model, the API or the
+> Gramps compatibility changes; the fork is a frontend build plus a deployment recipe.
+>
+> - **What differs from upstream:** `src/theme.js` (seed colours + light surfaces),
+>   `global.css` (shape/shadow tokens), `src/components/GrampsjsPages.js` (views as sheets),
+>   `src/SharedStyles.js` + `fonts/fira.css` (Fira Sans / Fira Code, self-hosted),
+>   `src/config.js` (`hideRegisterLink`, `appName`), `index.html` / `manifest.json` / `images/`
+>   (branding). Everything else is upstream, pulled in via `git fetch upstream && git merge`.
+> - **Deployment:** see [DEPLOY.md](DEPLOY.md) — ZimaOS today, a VPS behind Pangolin later.
+> - **Family records never live in this repo.** `.gitignore` refuses scans, photos and
+>   Gramps/GEDCOM exports; they are uploaded through the app as media.
+>
+> Upstream README follows.
+
+---
+
 # Gramps Web &ndash; Frontend
 
 Welcome to **Gramps Web**, a modern, feature-packed, free & open source web app for browsing and collaboratively editing genealogical databases. Fully interoperable with the [Gramps](https://gramps-project.org) desktop application, Gramps Web brings your family history to the web, making it accessible from anywhere and easy to share.
