@@ -182,6 +182,8 @@ export class GrampsJs extends LitElement {
 
         mwc-drawer {
           --mdc-drawer-width: 230px;
+          /* Ahnengalerie: the drawer sits on the page ground, not on a sheet */
+          --mdc-theme-surface: var(--md-sys-color-background);
           --mdc-typography-headline6-font-family: var(
             --grampsjs-heading-font-family
           );

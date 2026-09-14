@@ -37,7 +37,7 @@ export class TreeChart {
       this._content.attr('transform', event.transform)
     )
     this._svg = create('svg')
-      .attr('font-family', 'Inter var')
+      .attr('font-family', 'Fira Sans')
       .attr('font-size', 13)
       .call(this._zoom)
     this._content = this._svg.append('g').attr('id', 'chart-content')

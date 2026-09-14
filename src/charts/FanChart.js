@@ -333,7 +333,7 @@ export function FanChart(
       )
     )
     .attr('style', 'max-width: 100%; height: auto;')
-    .attr('font-family', 'Inter var')
+    .attr('font-family', 'Fira Sans')
     .attr('font-size', 12)
     .attr('text-anchor', 'middle')
 

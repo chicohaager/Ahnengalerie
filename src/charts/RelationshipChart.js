@@ -481,7 +481,7 @@ export function RelationshipChart(
         svg.select('#chart-content').attr('transform', e.transform)
       )
     )
-    .attr('font-family', 'Inter var')
+    .attr('font-family', 'Fira Sans')
     .attr('font-size', 13)
 
   const chartContent = svg.append('g').attr('id', 'chart-content')

@@ -3,14 +3,18 @@ import {css} from 'lit'
 export const sharedStyles = css`
   :host {
     line-height: 1.6;
-    --grampsjs-body-font-family: 'Inter var', sans-serif;
-    --grampsjs-heading-font-family: 'Inter var', sans-serif;
-    --grampsjs-mono-font-family: 'Commit Mono', monospace;
-    --md-ref-typeface-plain: 'Inter var', sans-serif;
-    --grampsjs-body-font-size: 17px;
+    /* Ahnengalerie: Fira Sans / Fira Code (ZFW design system). Fira Sans is a
+       static family, so the body weight is 400 instead of Inter's 340. */
+    --grampsjs-body-font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, sans-serif;
+    --grampsjs-heading-font-family: var(--grampsjs-body-font-family);
+    --grampsjs-mono-font-family: 'Fira Code', ui-monospace, 'SFMono-Regular',
+      Menlo, Consolas, monospace;
+    --md-ref-typeface-plain: var(--grampsjs-body-font-family);
+    --grampsjs-body-font-size: 16px;
     font-size: var(--grampsjs-body-font-size);
     font-family: var(--grampsjs-body-font-family);
-    --grampsjs-body-font-weight: 340;
+    --grampsjs-body-font-weight: 400;
     font-weight: var(--grampsjs-body-font-weight);
     --mdc-typography-font-family: var(--grampsjs-body-font-family);
     --md-sys-typescale-headline-small-font: var(--grampsjs-heading-font-family);
@@ -53,7 +57,8 @@ export const sharedStyles = css`
   h2,
   h3,
   h4 {
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     font-family: var(--grampsjs-heading-font-family);
     color: var(--grampsjs-color-shade-40);
   }

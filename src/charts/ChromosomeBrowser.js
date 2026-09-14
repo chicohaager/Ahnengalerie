@@ -32,7 +32,7 @@ const chromosomeLength = {
 export function ChromosomeBrowser(
   data,
   {
-    fontFamily = 'Inter var',
+    fontFamily = 'Fira Sans',
     fontSize = 16,
     fontWeight = 350,
     fontColor = 'var(--grampsjs-body-font-color)',
