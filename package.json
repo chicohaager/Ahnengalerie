@@ -125,7 +125,7 @@
   "license": "AGPL",
   "type": "module",
   "dependencies": {
-    "@americana/diplomat": "^0.5.0",
+    "@americana/diplomat": "^0.6.0",
     "@awesome.me/webawesome": "^3.4.0",
     "@hpcc-js/wasm": "^2.22.4",
     "@material/material-color-utilities": "^0.4.0",
@@ -155,7 +155,7 @@
     "jsondiffpatch": "^0.7.6",
     "jwt-decode": "^4.0.0",
     "lit": "^3.2.1",
-    "maplibre-gl": "^5.22.0",
+    "maplibre-gl": "^6.13.0",
     "marked": "^18.0.4",
     "pwa-helper-components": "^0.2.10",
     "pwa-helpers": "^0.9.1",
